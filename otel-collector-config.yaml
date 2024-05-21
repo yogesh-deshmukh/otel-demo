@@ -1,0 +1,67 @@
+extensions:
+  zpages:
+    endpoint: :55679
+
+connectors:
+  spanmetrics:
+    histogram:
+      explicit:
+        buckets: [100us, 1ms, 2ms, 6ms, 10ms, 100ms, 250ms]
+    dimensions:
+      - name: http.method
+        default: GET
+      - name: http.status_code
+    exemplars:
+      enabled: true
+    exclude_dimensions: ['status.code']
+    dimensions_cache_size: 1000
+    aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"    
+    metrics_flush_interval: 15s
+    metrics_expiration: 5m
+    events:
+      enabled: true
+      dimensions:
+        - name: exception.type
+        - name: exception.message
+    resource_metrics_key_attributes:
+      - service.name
+      - telemetry.sdk.language
+      - telemetry.sdk.name
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+  prometheus:
+    config:
+      scrape_configs:
+      - job_name: otel-collector-metrics
+        scrape_interval: 10s
+        static_configs:
+          - targets: ['0.0.0.0:8888']
+processors:
+  batch:
+
+exporters:
+  logging:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  otlphttp:
+    endpoint: http://jaeger:4318
+    tls:
+      insecure: true
+service:
+  extensions: [zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, otlphttp, spanmetrics]
+    metrics:
+      receivers: [prometheus, spanmetrics]
+      processors: [batch]
+      exporters: [prometheus,logging]
+    
