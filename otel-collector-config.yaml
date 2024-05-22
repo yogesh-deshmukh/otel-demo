@@ -5,19 +5,21 @@ extensions:
 connectors:
   spanmetrics:
     histogram:
-      explicit:
-        buckets: [100us, 1ms, 2ms, 6ms, 10ms, 100ms, 250ms]
+      disable: true
+      # explicit:
+      #   buckets: [100us, 1ms, 2ms, 6ms, 10ms, 100ms, 250ms]
     dimensions:
       - name: http.method
         default: GET
       - name: http.status_code
+      - name: telemetry.sdk.language
     exemplars:
       enabled: true
     exclude_dimensions: ['status.code']
     dimensions_cache_size: 1000
     aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"    
     metrics_flush_interval: 15s
-    metrics_expiration: 5m
+    # metrics_expiration: 5m
     events:
       enabled: true
       dimensions:
@@ -54,6 +56,10 @@ exporters:
     tls:
       insecure: true
 service:
+  telemetry:
+    metrics:
+      level: basic
+      address: ":8888"
   extensions: [zpages]
   pipelines:
     traces:

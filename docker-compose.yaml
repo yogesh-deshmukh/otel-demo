@@ -13,14 +13,19 @@ services:
       - "4317:4317" # OTLP gRPC receiver
       - "55679:55679" # zpages extension
       - "4318:4318"
+      - "8822:8822"
+    depends_on:
+      - jaeger
 
   prometheus:
-    image: quay.io/prometheus/prometheus:v2.34.0
+    image: prom/prometheus
     command: --config.file=/etc/prometheus/prometheus.yml --no-scrape.adjust-timestamps
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+    depends_on:
+      - otel-collector
 
   grafana:
     image: grafana/grafana:9.0.1
@@ -30,6 +35,9 @@ services:
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     ports:
       - "3000:3000"
+    depends_on:
+      - otel-collector
+      - prometheus
   
   jaeger:
     image: jaegertracing/all-in-one:${JAEGER_VERSION:-latest}
@@ -39,8 +47,11 @@ services:
       - "14250"
 
   my-python-api:
-    image: my-python-api
+    #image: my-python-api
+    build: app/
     ports:
       - "8091:80"
     environment:
       OTLP_ENDPOINT: "otel-collector:4318"
+    depends_on:
+      - otel-collector

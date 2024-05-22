@@ -9,7 +9,8 @@ from fastapi import FastAPI
 import os
 
 resource = Resource(attributes={
-    "service.name": "FastAPI"
+    "service.name": "FastAPI",
+    "telemetry.sdk.language": "Python"
 })
 
 # Configure OTLP exporter to send traces to your collector endpoint
