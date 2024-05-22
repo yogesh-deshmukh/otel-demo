@@ -3,4 +3,8 @@ scrape_configs:
     scrape_interval: 10s
     static_configs:
       - targets: ["otel-collector:8889"]
-      - targets: ["otel-collector:8888"]
+      # - targets: ["otel-collector:8822"]
+
+# Data retention configuration
+# storage:
+#   retention: "30d" # Retain data for 30 days
