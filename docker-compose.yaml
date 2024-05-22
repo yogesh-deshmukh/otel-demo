@@ -13,7 +13,6 @@ services:
       - "4317:4317" # OTLP gRPC receiver
       - "55679:55679" # zpages extension
       - "4318:4318"
-      - "8822:8822"
     depends_on:
       - jaeger
 
@@ -47,7 +46,6 @@ services:
       - "14250"
 
   my-python-api:
-    #image: my-python-api
     build: app/
     ports:
       - "8091:80"
